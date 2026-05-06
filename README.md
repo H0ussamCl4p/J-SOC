@@ -167,7 +167,7 @@ J-SOC/
 │               │   ├── Assignable.java
 │               │   └── Notifiable.java
 │               │
-│               ├── exception/                [MEMBRE 1]
+│               ├── exception/                [MEMBRE 2]
 │               │   ├── JSocException.java   (parent)
 │               │   ├── AuthenticationFailedException.java
 │               │   ├── IncidentNotFoundException.java
