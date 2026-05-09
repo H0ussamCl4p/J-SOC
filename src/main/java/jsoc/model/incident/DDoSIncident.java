@@ -6,23 +6,12 @@ import jsoc.model.user.User;
 
 import java.time.LocalDateTime;
 
-/**
- * Incident de type <b>DDoS</b> (Distributed Denial of Service).
- *
- * <p>Caractéristiques :</p>
- * <ul>
- *   <li><b>CWE-400</b> — Uncontrolled Resource Consumption</li>
- *   <li><b>SLA par défaut</b> : 2 heures</li>
- *   <li><b>Procédure</b> : mitigation réseau (filtrage, blackholing) + analyse du trafic</li>
- * </ul>
- */
 public class DDoSIncident extends Incident {
 
     public DDoSIncident(String title, String description, Severity severity) {
         super(title, description, severity);
     }
 
-    /** Constructeur complet pour la restauration CSV. */
     public DDoSIncident(String id, String title, String description,
                         Severity severity, IncidentStatus status,
                         LocalDateTime createdAt, User assignedTo) {
@@ -36,7 +25,7 @@ public class DDoSIncident extends Incident {
 
     @Override
     public String getResponseProcedure() {
-        return "Mitigation réseau + analyse trafic";
+        return "Mitigation reseau + analyse trafic";
     }
 
     @Override
