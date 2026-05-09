@@ -1,0 +1,261 @@
+@startuml J-SOC
+
+' ================================================================
+'  Diagramme de classes — projet J-SOC (Java SOC)
+'  Auteur : Membre 1 (Architecte)
+'  Périmètre : modèle métier (jsoc.model.*) + interfaces (jsoc.interfaces.*)
+'  Les packages exception/repository/service/cli sont délibérément
+'  absents — ils relèvent des autres membres (M2/M3/M4).
+' ================================================================
+
+' --- Configuration visuelle ---
+skinparam classAttributeIconSize 0
+skinparam packageStyle rectangle
+skinparam linetype ortho
+hide empty members
+
+title J-SOC — Diagramme de classes (modèle métier)
+
+' ================================================================
+'  Package : jsoc.interfaces
+' ================================================================
+package "jsoc.interfaces" <<Frame>> {
+
+    interface "Assignable<U>" as Assignable {
+        + assignTo(user: U) : void
+        + unassign() : void
+        + getAssignee() : U
+        + isAssigned() : boolean
+    }
+
+    interface Notifiable {
+        + notify(message: String) : void
+        + getNotifications() : List<String>
+        + clearNotifications() : void
+    }
+}
+
+' ================================================================
+'  Package : jsoc.model.enums
+' ================================================================
+package "jsoc.model.enums" <<Frame>> {
+
+    enum Severity {
+        LOW
+        MEDIUM
+        HIGH
+        CRITICAL
+        --
+        - slaHours : int
+        + getSlaHours() : int
+    }
+
+    enum IncidentStatus {
+        NEW
+        ASSIGNED
+        IN_PROGRESS
+        RESOLVED
+        CLOSED
+        ESCALATED
+        --
+        + canTransitionTo(next: IncidentStatus) : boolean
+        + isTerminal() : boolean
+    }
+}
+
+' ================================================================
+'  Package : jsoc.model (classes auxiliaires)
+' ================================================================
+package "jsoc.model" <<Frame>> {
+
+    class Comment {
+        - id : long
+        - author : String
+        - content : String
+        - timestamp : LocalDateTime
+    }
+
+    class HistoryEntry {
+        - id : long
+        - action : String
+        - performedBy : String
+        - timestamp : LocalDateTime
+        - oldValue : String
+        - newValue : String
+    }
+
+    class IOC {
+        - id : long
+        - type : IOCType
+        - value : String
+        - description : String
+    }
+
+    enum IOCType {
+        IP
+        HASH
+        URL
+        DOMAIN
+        EMAIL
+    }
+
+    ' IOCType est un enum *imbriqué* dans IOC en Java.
+    IOC +-- IOCType
+}
+
+' ================================================================
+'  Package : jsoc.model.user
+' ================================================================
+package "jsoc.model.user" <<Frame>> {
+
+    abstract class User {
+        - id : long
+        - username : String
+        - password : String
+        - email : String
+        - notifications : List<String>
+        --
+        + {abstract} getRole() : String
+        + {abstract} canPerformAction(action: String) : boolean
+        + notify(message: String) : void
+        + getNotifications() : List<String>
+        + clearNotifications() : void
+    }
+
+    class Analyst {
+        + getRole() : String
+        + canPerformAction(action: String) : boolean
+    }
+
+    class Manager {
+        + getRole() : String
+        + canPerformAction(action: String) : boolean
+    }
+
+    User <|-- Analyst
+    User <|-- Manager
+}
+
+' ================================================================
+'  Package : jsoc.model.incident
+' ================================================================
+package "jsoc.model.incident" <<Frame>> {
+
+    abstract class Incident {
+        - id : String
+        - title : String
+        - description : String
+        - severity : Severity
+        - status : IncidentStatus
+        - createdAt : LocalDateTime
+        - assignedTo : User
+        - comments : List<Comment>
+        - history : List<HistoryEntry>
+        - iocs : Set<IOC>
+        --
+        + {abstract} getType() : String
+        + {abstract} getResponseProcedure() : String
+        + {abstract} computeDefaultSLAHours() : int
+        + {abstract} getCWE() : String
+        + addComment(c: Comment) : void
+        + addHistoryEntry(h: HistoryEntry) : void
+        + addIOC(ioc: IOC) : void
+        + transitionTo(newStatus: IncidentStatus) : void
+        + assignTo(user: User) : void
+        + unassign() : void
+        + getAssignee() : User
+        + isAssigned() : boolean
+    }
+
+    class PhishingIncident {
+        + getType() : "PHISHING"
+        + getResponseProcedure() : String
+        + computeDefaultSLAHours() : 4
+        + getCWE() : "CWE-1021"
+    }
+
+    class MalwareIncident {
+        + getType() : "MALWARE"
+        + getResponseProcedure() : String
+        + computeDefaultSLAHours() : 1
+        + getCWE() : "CWE-506"
+    }
+
+    class DDoSIncident {
+        + getType() : "DDOS"
+        + getResponseProcedure() : String
+        + computeDefaultSLAHours() : 2
+        + getCWE() : "CWE-400"
+    }
+
+    Incident <|-- PhishingIncident
+    Incident <|-- MalwareIncident
+    Incident <|-- DDoSIncident
+}
+
+' ================================================================
+'  Implémentations d'interfaces
+' ================================================================
+
+User      ..|> Notifiable
+Incident  ..|> Assignable : <<U=User>>
+
+' ================================================================
+'  Associations / compositions
+' ================================================================
+
+' --- Incident possède ses commentaires, son historique, ses IOCs (composition)
+Incident "1" *-- "0..*" Comment        : > comments
+Incident "1" *-- "0..*" HistoryEntry   : > history
+Incident "1" *-- "0..*" IOC            : > iocs
+
+' --- Incident référence (sans posséder) sa sévérité et son statut
+Incident "1" --> "1"   Severity        : > severity
+Incident "1" --> "1"   IncidentStatus  : > status
+
+' --- Incident référence éventuellement un porteur (User)
+Incident "1" --> "0..1" User           : > assignedTo
+
+' --- IOC référence son type
+IOC      "1" --> "1"   IOCType         : > type
+
+' ================================================================
+'  Notes pédagogiques
+' ================================================================
+
+note top of Incident
+  <b>Classe abstraite</b>
+  Ne peut pas être instanciée directement.
+  Chaque sous-classe (Phishing/Malware/DDoS)
+  fournit son CWE, sa procédure de réponse
+  et son SLA par défaut.
+end note
+
+note top of User
+  <b>Classe abstraite</b>
+  Implémente <b>Notifiable</b>
+  (mécanisme de notifications mutualisé
+  pour Analyst et Manager).
+end note
+
+note right of Severity
+  Enum avec attribut métier :
+  chaque niveau porte un SLA
+  par défaut en heures.
+  LOW=72, MEDIUM=24, HIGH=4, CRITICAL=1
+end note
+
+note right of IncidentStatus
+  Machine à états :
+  NEW → ASSIGNED → IN_PROGRESS → RESOLVED → CLOSED
+  IN_PROGRESS ↔ ESCALATED
+end note
+
+note bottom of Assignable
+  Interface <b>générique</b> Assignable&lt;U&gt;.
+  Découple le contrat "être assignable"
+  du type concret du porteur.
+  Incident l'instancie avec U = User.
+end note
+
+@enduml
