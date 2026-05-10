@@ -1,0 +1,4 @@
+username,password,email,role
+alice,password,alice@jsoc.local,ANALYST
+bob,password,bob@jsoc.local,ANALYST
+carol,password,carol@jsoc.local,MANAGER
