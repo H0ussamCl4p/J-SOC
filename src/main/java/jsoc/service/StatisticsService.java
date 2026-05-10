@@ -35,7 +35,7 @@ public class StatisticsService {
         this.slaService         = slaService;
     }
 
-    // ── Comptages ─────────────────────────────────────────────────────────────
+    //  Comptages 
 
     public long getTotalIncidents() {
         return incidentRepository.findAll().size();
@@ -65,7 +65,7 @@ public class StatisticsService {
                 .count();
     }
 
-    // ── Temps de résolution ───────────────────────────────────────────────────
+    // Temps de résolution
 
     /**
      * Retourne le temps de résolution moyen sur tous les incidents résolus.
@@ -108,7 +108,7 @@ public class StatisticsService {
         return result;
     }
 
-    // ── SLA ───────────────────────────────────────────────────────────────────
+    //  SLA 
 
     public long getTotalSlaBreaches() {
         return incidentRepository.findAll().stream()
@@ -123,7 +123,7 @@ public class StatisticsService {
         return String.format("%.1f%%", (double) breached / total * 100.0);
     }
 
-    // ── Performance par analyste ──────────────────────────────────────────────
+    //  Performance par analyste 
 
     /**
      * Retourne pour chaque analyste :
@@ -172,7 +172,7 @@ public class StatisticsService {
         return result;
     }
 
-    // ── Tendances ─────────────────────────────────────────────────────────────
+    //  Tendances
 
     public long getIncidentsCreatedInLastDays(int days) {
         LocalDateTime cutoff = LocalDateTime.now().minusDays(days);
@@ -192,7 +192,7 @@ public class StatisticsService {
                 .count();
     }
 
-    // ── Dashboard complet ─────────────────────────────────────────────────────
+    // Dashboard complet 
 
     public void printDashboard() {
         Duration avgRes = getAverageResolutionTime();
