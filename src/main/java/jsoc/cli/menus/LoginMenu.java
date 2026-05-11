@@ -1,7 +1,6 @@
 package jsoc.cli.menus;
 import jsoc.model.user.User;
 import jsoc.service.AuthService;
-import jsoc.cli.utils.ConsoleHelper;
 import java.util.Scanner;
 public class LoginMenu {
         private final AuthService authService;

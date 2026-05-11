@@ -7,7 +7,6 @@ import jsoc.service.AssignmentService;
 import jsoc.service.StatisticsService;
 import jsoc.cli.utils.ConsoleHelper;
 import jsoc.cli.utils.TableFormatter;
-import java.util.Map;
 import java.util.Scanner;
 
 public class ManagerMenu {
