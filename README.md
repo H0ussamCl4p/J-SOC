@@ -587,7 +587,7 @@ Aucune donnée réelle ne doit être stockée dans le système. Les comptes util
 |-----|------|--------|
 | Houssam | Architecte / Lead | [@H0ussamCl4p](https://github.com/H0ussamCl4p) |
 | _À compléter_ | Persistance | _@username_ |
-| _À compléter_ | Services | _@username_ |
+| Fouad_Naatani | Services | [@fouad-naatani](https://github.com/fouad-naatani)|
 | _À compléter_ | CLI / Doc | _@username_ |
 
 ---
