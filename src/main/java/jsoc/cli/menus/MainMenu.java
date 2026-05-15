@@ -26,7 +26,7 @@ public class MainMenu {
         this.console = new ConsoleHelper(scanner);
         this.incidentMenu = new IncidentMenu(currentUser, scanner, incidentService, slaService);
         this.managerMenu = new ManagerMenu(currentUser, scanner, incidentService, assignmentService, statisticsService);
-        this.reportMenu = new ReportMenu(currentUser, scanner, incidentService);
+        this.reportMenu = new ReportMenu(currentUser, scanner, incidentService, slaService);
     }
 
     public void show() {

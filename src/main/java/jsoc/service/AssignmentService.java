@@ -55,13 +55,14 @@ public class AssignmentService {
 
         validateAssignable(incident);
 
-        // Transition NEW → IN_PROGRESS automatique à la première assignation
+        // Transition NEW → ASSIGNED conformément à la machine à états du modèle.
+        // L'analyste fera ASSIGNED → IN_PROGRESS quand il commencera réellement à traiter.
         if (incident.getStatus() == IncidentStatus.NEW) {
             try {
-                incident.transitionTo(IncidentStatus.IN_PROGRESS);
+                incident.transitionTo(IncidentStatus.ASSIGNED);
             } catch (IllegalStateException e) {
                 throw new InvalidStateTransitionException(
-                    "NEW -> IN_PROGRESS", e.getMessage());
+                    "NEW -> ASSIGNED : " + e.getMessage());
             }
         }
 
@@ -215,7 +216,6 @@ public class AssignmentService {
         IncidentStatus s = incident.getStatus();
         if (s != IncidentStatus.NEW && s != IncidentStatus.ESCALATED) {
             throw new InvalidStateTransitionException(
-                s.name() + " -> ASSIGNED",
                 "Impossible d'assigner l'incident " + incident.getId()
                 + " avec le statut " + s + ". Statut requis : NEW ou ESCALATED."
             );

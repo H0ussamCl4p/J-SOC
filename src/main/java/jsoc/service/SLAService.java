@@ -2,7 +2,6 @@ package jsoc.service;
 
 import jsoc.model.incident.Incident;
 import jsoc.model.enums.IncidentStatus;
-import jsoc.model.enums.Severity;
 import jsoc.repository.IncidentRepository;
 
 import java.time.Duration;
@@ -34,19 +33,6 @@ public class SLAService {
     }
 
     // ── Délai SLA ─────────────────────────────────────────────────────────────
-
-    /**
-     * Retourne le délai SLA en heures selon la sévérité.
-     * Utilisé comme fallback si computeDefaultSLAHours() n'est pas surchargé.
-     */
-    public int getSlaHours(Severity severity) {
-        return switch (severity) {
-            case CRITICAL -> 4;
-            case HIGH     -> 8;
-            case MEDIUM   -> 24;
-            case LOW      -> 72;
-        };
-    }
 
     /**
      * Retourne la date limite SLA d'un incident.
