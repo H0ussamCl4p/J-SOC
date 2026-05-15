@@ -38,8 +38,6 @@ public class AuthService {
         }
 
         this.currentUser = opt.get();
-        System.out.println("[AUTH] Bienvenue, " + currentUser.getUsername()
-                + " (" + currentUser.getRole() + ")");
         return currentUser;
     }
 

@@ -3,8 +3,8 @@ package jsoc.cli.menus;
 import jsoc.model.incident.Incident;
 import jsoc.model.user.User;
 import jsoc.service.IncidentService;
+import jsoc.service.SLAService;
 import jsoc.cli.utils.ConsoleHelper;
-import jsoc.cli.utils.TableFormatter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -16,33 +16,42 @@ public class ReportMenu {
 
     private final User currentUser;
     private final ConsoleHelper console;
-    private final TableFormatter table;
     private final IncidentService incidentService;
+    private final SLAService slaService;
 
-    public ReportMenu(User currentUser, Scanner scanner, IncidentService incidentService) {
+    public ReportMenu(User currentUser, Scanner scanner,
+                      IncidentService incidentService,
+                      SLAService slaService) {
         this.currentUser = currentUser;
         this.console = new ConsoleHelper(scanner);
-        this.table = new TableFormatter();
         this.incidentService = incidentService;
+        this.slaService = slaService;
     }
 
     public void show() {
         boolean running = true;
         while (running) {
             console.printHeader("Reports");
-            System.out.println("  1. Export TXT report");
-            System.out.println("  2. Export CSV report");
-            System.out.println("  3. Export Markdown report");
+            System.out.println("  1. SLA report (console)");
+            System.out.println("  2. Export TXT report");
+            System.out.println("  3. Export CSV report");
+            System.out.println("  4. Export Markdown report");
             System.out.println("  0. Back");
 
-            int choice = console.readInt("\nChoice: ", 0, 3);
+            int choice = console.readInt("\nChoice: ", 0, 4);
             switch (choice) {
-                case 1 -> exportTXT();
-                case 2 -> exportCSV();
-                case 3 -> exportMarkdown();
+                case 1 -> showSlaReport();
+                case 2 -> exportTXT();
+                case 3 -> exportCSV();
+                case 4 -> exportMarkdown();
                 case 0 -> running = false;
             }
         }
+    }
+
+    private void showSlaReport() {
+        slaService.printSlaReport();
+        console.pause();
     }
 
     private void exportTXT() {
@@ -75,12 +84,12 @@ public class ReportMenu {
             fw.write("ID,Title,Type,Severity,Status,AssignedTo\n");
             for (Incident i : incidents) {
                 fw.write(String.join(",",
-                        i.getId(),
-                        "\"" + i.getTitle() + "\"",
-                        i.getClass().getSimpleName(),
-                        i.getSeverity().toString(),
-                        i.getStatus().toString(),
-                        i.isAssigned() ? i.getAssignee().getUsername() : "Unassigned"
+                        csvEscape(i.getId()),
+                        csvEscape(i.getTitle()),
+                        csvEscape(i.getType()),
+                        csvEscape(i.getSeverity().toString()),
+                        csvEscape(i.getStatus().toString()),
+                        csvEscape(i.isAssigned() ? i.getAssignee().getUsername() : "Unassigned")
                 ) + "\n");
             }
             System.out.println("  ✔ CSV report saved: " + filename);
@@ -102,8 +111,8 @@ public class ReportMenu {
             for (Incident i : incidents) {
                 fw.write("| " + String.join(" | ",
                         i.getId(),
-                        i.getTitle(),
-                        i.getClass().getSimpleName(),
+                        i.getTitle().replace("|", "\\|"),
+                        i.getType(),
                         i.getSeverity().toString(),
                         i.getStatus().toString(),
                         i.isAssigned() ? i.getAssignee().getUsername() : "Unassigned"
@@ -114,6 +123,14 @@ public class ReportMenu {
             System.out.println("  ✘ Error: " + e.getMessage());
         }
         console.pause();
+    }
+
+    private static String csvEscape(String value) {
+        if (value == null) return "";
+        if (value.contains(",") || value.contains("\"") || value.contains("\n")) {
+            return "\"" + value.replace("\"", "\"\"") + "\"";
+        }
+        return value;
     }
 
     private String timestamp() {

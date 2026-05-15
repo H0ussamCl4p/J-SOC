@@ -106,8 +106,7 @@ public class IncidentService {
             incident.transitionTo(newStatus);
         } catch (IllegalStateException e) {
             throw new InvalidStateTransitionException(
-                oldStatus.name() + " -> " + newStatus.name(),
-                e.getMessage()
+                oldStatus.name() + " -> " + newStatus.name() + " : " + e.getMessage()
             );
         }
 

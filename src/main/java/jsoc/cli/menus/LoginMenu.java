@@ -20,8 +20,16 @@ public class LoginMenu {
             User user = null;
             while (user == null) {
                 System.out.print("\nUsername: ");
+                if (!scanner.hasNextLine()) {
+                    System.out.println("\nGoodbye.");
+                    System.exit(0);
+                }
                 String username = scanner.nextLine().trim();
                 System.out.print("Password: ");
+                if (!scanner.hasNextLine()) {
+                    System.out.println("\nGoodbye.");
+                    System.exit(0);
+                }
                 String password = scanner.nextLine().trim();
 
                 try {
